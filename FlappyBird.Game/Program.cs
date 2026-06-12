@@ -38,28 +38,32 @@ class Program
         ref bool gameStarted,
         ref bool gameOver,    
         Bird bird, 
-        Pipe pipe, 
+        Pipe[] pipes, 
         float width, 
         ref float gravity, 
         ref float speed, 
         ref int score, 
-        float hight)
+        float hight,
+        Random random)
     {
         if(gameOver == true && Raylib.IsKeyPressed(KeyboardKey.R))
             {
                 gameStarted = false;
                 gameOver = false;
 
+                for(int i = 0; i < pipes.Length ; i++)
+                {
+                    pipes[i].x = width + random.Next(100 , 400) + i * 400;
+                    pipes[i].gapY = random.Next(100 , 500);
+                    pipes[i].passed = false;
+                }
+
                 bird.x = 200f;
                 bird.y = 360f;
-                pipe.x = width + 300;
                 bird.velocity = 0;
                 gravity = 0;
                 speed = 0;
                 score = 0;
-                pipe.passed = false;
-
-                pipe.gapY = 250;
             }
     }
 
@@ -135,12 +139,14 @@ class Program
 
         Raylib.DrawRectangle((int)pipe.x , (int)tubeDownY ,70 , (int)tubeDownHight , Color.Green);
     }
+    
 
     static void Main()
     {
 
         Bird bird = new Bird();
-        Pipe pipe = new Pipe();
+
+        Pipe[] pipes = new Pipe[3];
 
         Random random = new Random();
         
@@ -168,26 +174,33 @@ class Program
         Raylib.SetTargetFPS(60);
 
 
+            for(int i = 0; i < pipes.Length ; i++)
+            {
+                pipes[i] = new Pipe();
+
+                pipes[i].x = width + i * 400;
+            }
+
         while (!Raylib.WindowShouldClose())
         {
 
-            float tubeDownY = pipe.gapY + pipe.gapSize;
-            float tubeDownHight = height - tubeDownY;
-
         
             StartGame(ref gameStarted , ref gravity , ref speed);
-            
-
+        
+        
             if (!gameOver)
             {
                 UpdateBird(bird , gravity);
-                UpdatePipe(pipe , speed , width ,  random);
+
+                foreach(Pipe pipe in pipes)
+            {
+                UpdatePipe(pipe , speed , width , random);
                 ScoreSystem(pipe , ref score , bird);
+            }
             }
 
 
-
-            ResetGame(ref gameStarted , ref gameOver , bird , pipe , width , ref gravity , ref speed , ref score , height);
+            ResetGame(ref gameStarted , ref gameOver , bird , pipes , width , ref gravity , ref speed , ref score , height , random);
 
             if (!gameOver && Raylib.IsKeyPressed(KeyboardKey.Space))
             {
@@ -198,25 +211,41 @@ class Program
 
 
 
-            if(CheckCollision(bird , pipe , tubeDownY , tubeDownHight))
-            {
-                gameOver = true;
-            }
-
             if(bird.y > height + 10)
             {
                 gameOver = true;
             }
 
 
+            foreach(Pipe pipe in pipes)
+            {
+                float tubeDownY = pipe.gapY + pipe.gapSize;
+                float tubeDownHeight = height - tubeDownY;
+
+                if (CheckCollision(bird , pipe , tubeDownY , tubeDownHeight))
+                {
+                    gameOver = true;
+                }
+            }
+            
+
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Color.SkyBlue);
 
 
-            DrawPipe(pipe , tubeDownHight , tubeDownY , tubeUpY);
 
 
-            //Drawing tubes! 
+
+
+            foreach(Pipe pipe in pipes)
+            {
+                float tubeDownY = pipe.gapY + pipe.gapSize;
+                float tubeDownHeight = height - tubeDownY;
+
+                DrawPipe(pipe , tubeDownHeight , tubeDownY , tubeUpY);
+            }
+
+            //Drawing pipes! 
 
             DrawBird(bird);
 
