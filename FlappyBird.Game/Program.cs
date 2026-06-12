@@ -3,6 +3,119 @@
 class Program
 {
 
+    static bool CheckCollision(Bird bird , Pipe pipe , float tubeDownY , float tubeDownHeight)
+    {
+        Rectangle birdHitBox = new Rectangle(
+        
+            bird.x - bird.radius,
+            bird.y - bird.radius,
+            bird.radius * 2,
+            bird.radius * 2
+        );
+
+        Rectangle TopTubeHitBox = new Rectangle(
+
+            pipe.x,
+            0,
+            70,
+            pipe.gapY
+        );
+
+        Rectangle BottomTubeHistBox = new Rectangle(
+
+            pipe.x,
+            tubeDownY,
+            70,
+            tubeDownHeight
+        );
+
+        return
+             Raylib.CheckCollisionRecs(birdHitBox , TopTubeHitBox) ||
+             Raylib.CheckCollisionRecs(birdHitBox , BottomTubeHistBox);
+    }
+
+    static void ResetGame(
+        ref bool gameStarted,
+        ref bool gameOver,    
+        Bird bird, 
+        Pipe pipe, 
+        float width, 
+        ref float gravity, 
+        ref float speed, 
+        ref int score, 
+        float hight)
+    {
+        if(gameOver == true && Raylib.IsKeyPressed(KeyboardKey.R))
+            {
+                gameStarted = false;
+                gameOver = false;
+
+                bird.x = 200f;
+                bird.y = 360f;
+                pipe.x = width + 300;
+                bird.velocity = 0;
+                gravity = 0;
+                speed = 0;
+                score = 0;
+                pipe.passed = false;
+
+                pipe.gapY = 250;
+            }
+    }
+
+    static void StartGame(ref bool gameStarted , ref float gravity , ref float speed)
+    {
+        if(Raylib.IsKeyPressed(KeyboardKey.Space) && gameStarted == false)
+            {
+                gameStarted = true;
+            }
+
+
+            if(gameStarted)
+            {
+                gravity = 900f;
+                speed = 260f;
+            }
+    }
+
+    static void UpdateBird(Bird bird , float gravity)
+    {
+        bird.velocity += gravity * Raylib.GetFrameTime();
+        bird.y += bird.velocity * Raylib.GetFrameTime();
+
+        if(bird.y < 0)
+            {
+                bird.y = 0;
+            }
+    }
+
+    static void UpdatePipe(Pipe pipe , float speed , int width , Random random)
+    {
+        pipe.x -= speed * Raylib.GetFrameTime();
+
+        if(pipe.x < -80)
+            {
+                pipe.x = width;
+                pipe.gapY = random.Next(100 , 440);
+                pipe.passed = false;
+            }
+    }
+
+    static void ScoreSystem(Pipe pipe , ref int score , Bird bird)
+    {
+        if(!pipe.passed && pipe.x + 70 < bird.x)
+            {
+                score++;
+                pipe.passed = true;
+            }
+    }
+
+
+    static void DrawBird(Bird bird)
+    {
+        Raylib.DrawCircle((int)bird.x , (int)bird.y , bird.radius , Color.Yellow);
+    }
+
     static void DrawCenteredText(string text , Color color)
     {
         int fontsize = 50;
@@ -15,162 +128,84 @@ class Program
         Raylib.DrawText(text , x , y , fontsize , color);
     }
 
+
+    static void DrawPipe(Pipe pipe , float tubeDownHight , float tubeDownY , float tubeUpY)
+    {
+        Raylib.DrawRectangle((int)pipe.x , (int)tubeUpY , 70 , (int)pipe.gapY , Color.Green);
+
+        Raylib.DrawRectangle((int)pipe.x , (int)tubeDownY ,70 , (int)tubeDownHight , Color.Green);
+    }
+
     static void Main()
     {
+
+        Bird bird = new Bird();
+        Pipe pipe = new Pipe();
 
         Random random = new Random();
         
 
-        int width = 1280;
-        int hight = 720;
+        const int width = 1280;
+        const int height = 720;
 
 
-        float birdX = 200f;
-        float birdY = 360f;
-
-        float velocity = 0;
         float gravity = 0;
         float jumpfoce = -300f;
-        int radius = 20;
         
         bool gameStarted = false;
-        bool GameOver = false;
-
-        float tubeX = 1000f;
-
-        float gapY = 250;
-        float gapSize = 180;
+        bool gameOver = false;
         
 
         float tubeUpY = 0f;
-
-        float tubeDownY = gapY + gapSize;
-        float tubeDownHight = hight - tubeDownY;
  
         float speed = 0f;
 
         int score = 0;
 
-        bool tubeIsPased = false;
-
-
         // Setting variables
 
-        Raylib.InitWindow(width , hight , "Flappy Bird");
+        Raylib.InitWindow(width , height , "Flappy Bird");
         Raylib.SetTargetFPS(60);
 
 
         while (!Raylib.WindowShouldClose())
         {
-            
-            Rectangle birdHitBox = new Rectangle(
+
+            float tubeDownY = pipe.gapY + pipe.gapSize;
+            float tubeDownHight = height - tubeDownY;
+
         
-            birdX - radius,
-            birdY - radius,
-            radius * 2,
-            radius * 2
-        );
+            StartGame(ref gameStarted , ref gravity , ref speed);
+            
 
-        Rectangle TopTubeHitBox = new Rectangle(
-
-            tubeX,
-            0,
-            70,
-            gapY
-        );
-
-        Rectangle BottomTubeHistBox = new Rectangle(
-
-            tubeX,
-            tubeDownY,
-            70,
-            tubeDownHight
-        );
-
-            if(Raylib.IsKeyPressed(KeyboardKey.Space) && gameStarted == false)
+            if (!gameOver)
             {
-                gameStarted = true;
+                UpdateBird(bird , gravity);
+                UpdatePipe(pipe , speed , width ,  random);
+                ScoreSystem(pipe , ref score , bird);
             }
 
 
-            if(gameStarted)
+
+            ResetGame(ref gameStarted , ref gameOver , bird , pipe , width , ref gravity , ref speed , ref score , height);
+
+            if (!gameOver && Raylib.IsKeyPressed(KeyboardKey.Space))
             {
-                gravity = 900f;
-                speed = 260f;
-            }
-
-            if (!GameOver)
-            {
-                velocity += gravity * Raylib.GetFrameTime();
-                birdY += velocity * Raylib.GetFrameTime();
-
-                tubeX -= speed * Raylib.GetFrameTime();
-            }
-
-            //Game starting logic
-
-
-
-            if (!GameOver && Raylib.IsKeyPressed(KeyboardKey.Space))
-            {
-                velocity = jumpfoce;
-            }
-
-            if(GameOver == true && Raylib.IsKeyPressed(KeyboardKey.R))
-            {
-                gameStarted = false;
-                GameOver = false;
-
-                birdX = 200f;
-                birdY = 360f;
-                tubeX = width + 300;
-                velocity = 0;
-                gravity = 0;
-                speed = 0;
-                score = 0;
-                tubeIsPased = false;
-
-                gapY = 250;
-                tubeDownY = gapY + gapSize;
-                tubeDownHight = hight - tubeDownY;
-
-                continue;
+                bird.velocity = jumpfoce;
             }
 
             //Input
 
-            if(birdY < 0)
+
+
+            if(CheckCollision(bird , pipe , tubeDownY , tubeDownHight))
             {
-                birdY = 0;
+                gameOver = true;
             }
 
-            if(birdY > hight + 10)
+            if(bird.y > height + 10)
             {
-                GameOver = true;
-            }
-
-            //Physics
-
-            if(tubeX < -80)
-            {
-                tubeX = width;
-                gapY = random.Next(100 , 440);
-
-                 tubeDownY = gapY + gapSize;
-                 tubeDownHight = hight - tubeDownY;
-
-                 tubeIsPased = false;
-            }
-
-            if(!tubeIsPased && tubeX + 70 < birdX)
-            {
-                score++;
-                tubeIsPased = true;
-            }
-
-            if(Raylib.CheckCollisionRecs(birdHitBox , TopTubeHitBox)|| Raylib.CheckCollisionRecs(birdHitBox , BottomTubeHistBox))
-            {
-                GameOver = true;
+                gameOver = true;
             }
 
 
@@ -178,14 +213,12 @@ class Program
             Raylib.ClearBackground(Color.SkyBlue);
 
 
-            Raylib.DrawRectangle((int)tubeX , (int)tubeUpY , 70 , (int)gapY , Color.Green);
-
-            Raylib.DrawRectangle((int)tubeX , (int)tubeDownY ,70 , (int)tubeDownHight , Color.Green);
+            DrawPipe(pipe , tubeDownHight , tubeDownY , tubeUpY);
 
 
             //Drawing tubes! 
 
-            Raylib.DrawCircle((int)birdX , (int)birdY , radius , Color.Yellow);
+            DrawBird(bird);
 
             //Draw bird
 
@@ -194,7 +227,7 @@ class Program
                 DrawCenteredText("Press 'Space'" , Color.Black);
             }
 
-            if (GameOver)
+            if (gameOver)
             {
                DrawCenteredText("Game over!" , Color.Red);
             }
