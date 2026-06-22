@@ -7,10 +7,10 @@ class Program
     {
         Rectangle birdHitBox = new Rectangle(
         
-            bird.x - bird.radius,
-            bird.y - bird.radius,
-            bird.radius * 2,
-            bird.radius * 2
+            bird.x - 45,
+            bird.y - 30,
+            55,
+            30
         );
 
         Rectangle TopTubeHitBox = new Rectangle(
@@ -51,8 +51,6 @@ class Program
     static void Main()
     {
 
-        Bird bird = new Bird();
-
         Pipe[] pipes = new Pipe[3];
 
         Random random = new Random();
@@ -92,7 +90,19 @@ class Program
         Raylib.InitWindow(width , height , "Flappy Bird");
         Raylib.SetTargetFPS(60);
 
-        Texture2D background = Raylib.LoadTexture("Assets/Background.png");
+        Texture2D background = Raylib.LoadTexture("Assets/Sprites/Background.png");
+        Texture2D title = Raylib.LoadTexture("Assets/Sprites/GameTitle.png");
+
+
+
+        Raylib.InitAudioDevice();
+        Music ambient = Raylib.LoadMusicStream("Assets/ambient.mp3");
+        Raylib.PlayMusicStream(ambient);
+        Raylib.SetMusicVolume(ambient , 0.5f);
+
+
+
+        Bird bird = new Bird();
 
 
         float bgX1 = 0;
@@ -111,7 +121,9 @@ class Program
         while (!Raylib.WindowShouldClose())
         {
 
-        
+            Raylib.UpdateMusicStream(ambient);
+
+
             game.Start(game);
 
 
@@ -150,8 +162,6 @@ class Program
             {
                 case GameState.Menu :
 
-                    if(game.state == GameState.Menu)
-            {
                 if (Raylib.IsKeyPressed(KeyboardKey.Up))
                 {
                     selectedIndex--;
@@ -168,7 +178,7 @@ class Program
                 {
                     selectedIndex = 0;
                 }
-            }
+
 
 
             if(game.state == GameState.Menu && Raylib.IsKeyPressed(KeyboardKey.Enter))
@@ -192,8 +202,6 @@ class Program
 
                 case GameState.DifficultyMenu :
 
-                    if(game.state == GameState.DifficultyMenu)
-            {
                 if (Raylib.IsKeyPressed(KeyboardKey.Up))
                 {
                     selectedDifficultyIndex--;
@@ -210,7 +218,7 @@ class Program
                 {
                     selectedDifficultyIndex = 0;
                 }
-            }
+            
 
             if(game.state == GameState.DifficultyMenu && Raylib.IsKeyPressed(KeyboardKey.Enter))
             {
@@ -277,7 +285,7 @@ class Program
                     game.state = GameState.GameOver;
                 }
             }
-            
+        
 
             Raylib.BeginDrawing();
             Raylib.ClearBackground(Color.SkyBlue);
@@ -306,14 +314,22 @@ class Program
 
             if (game.state == GameState.Menu)
             {
+
+                Raylib.DrawTexture(title , 440 , 60 , Color.White);
+
                for (int i = 0 ; i < menuItems.Length; i++)
                 {
                     Color color =
                     i == selectedIndex ? Color.Yellow : Color.White;
 
-                Raylib.DrawText(menuItems[i] , 500 , 250 + i * 60 , 40 , color);
+                int menuStartY = 350;
+
+                Raylib.DrawText(menuItems[i] , 500 , menuStartY + i * 60 , 40 , color);
+
                 }
             }
+
+            
 
             if(game.state == GameState.DifficultyMenu)
             {
@@ -353,7 +369,12 @@ class Program
             Raylib.EndDrawing();
         }
 
+        Raylib.UnloadTexture(title);
         Raylib.UnloadTexture(background);
+        bird.UnLoad();
+
+        Raylib.UnloadMusicStream(ambient);
+        Raylib.CloseAudioDevice();
 
         Raylib.CloseWindow();
     }
