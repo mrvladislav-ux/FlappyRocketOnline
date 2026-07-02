@@ -1,43 +1,45 @@
-# Flappy Rocket 🚀
+# Flappy Rocket Online
 
-A 2D arcade-style game inspired by Flappy Bird, built with **C#** and **Raylib-cs**.
+A Flappy Bird-inspired game built with **Raylib (C#)** and **ASP.NET Core**.
 
-The player controls a rocket that must fly through gaps between moving obstacles while avoiding collisions. The goal is to survive as long as possible and achieve the highest score.
 
----
+## Screenshots
 
-## Gameplay
+Main Menu:
 
-- Press **Space** to make the rocket fly upward
-- Avoid crashing into pipes or going out of bounds
-- The game speeds up depending on difficulty
-- Try to beat your high score!
+<img width="1277" height="716" alt="Screenshot 2026-07-02 at 11 17 11 AM" src="https://github.com/user-attachments/assets/6ac97698-08f8-41a6-b2e1-b9a799cbc473" />
 
----
+
+Gameplay:
+
+<img width="1274" height="716" alt="Screenshot 2026-07-02 at 11 30 19 AM" src="https://github.com/user-attachments/assets/96134933-24b1-4141-9d96-33f66b668819" />
+
 
 ## Features
 
-- Smooth 2D movement with gravity-based physics  
-- Procedural pipe generation  
-- Score system  
-- Multiple difficulty modes:
+* Arcade gameplay
+* Multiple difficulty modes
   - Easy
   - Medium
   - Hard
-  - Dynamic scaling difficulty  
-- Main menu system  
-- Pause functionality  
-- Background music  
-- Animated background  
-
----
+  - Dynamic
+* User registration & login
+* JWT authentication
+* Online leaderboard
+* SQLite database with Entity Framework Core
+* REST API
 
 ## Tech Stack
 
-- C#
-- Raylib-cs (Raylib bindings for C#)
+* C#
+* Raylib-cs
+* ASP.NET Core
+* Entity Framework Core
+* SQLite
+* JWT
+* BCrypt
 
----
+## Status
 
-## Screenshots
+🚧 Work in progress.
 
